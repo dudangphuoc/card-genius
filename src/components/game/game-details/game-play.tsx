@@ -23,7 +23,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import {  Grid, useMediaQuery, useTheme } from "@mui/system";
+import { Grid, padding, useMediaQuery, useTheme } from "@mui/system";
 import { useRouter } from 'next/navigation';
 import React, { useState } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -55,7 +55,7 @@ export function GamePlay(): React.JSX.Element {
           return;
         }
         setCurrentData(rs.data);
-        
+
         // get boards from local storage
         var currentBoard = boards?.find((x) => x.id == rs.data?.id);
         if (currentBoard == undefined) {
@@ -131,9 +131,9 @@ export function GamePlay(): React.JSX.Element {
   const handleDeselectValue = () => {
     console.log(selectedValue);
     console.log(boardCode);
-    const round:number = selectedValue ?? 0;
-    
-    boardClient.removePoint({ uniqueCode: boardCode ?? "", round: round}).then((rs) => {
+    const round: number = selectedValue ?? 0;
+
+    boardClient.removePoint({ uniqueCode: boardCode ?? "", round: round }).then((rs) => {
       if (rs.message != null) {
         return;
       }
@@ -154,8 +154,8 @@ export function GamePlay(): React.JSX.Element {
     setAddPointExpanded(false);
   };
 
-  const handleSaveAddPoint = (body:AddPointCommand ) => {
-    body.round = (currentData?.players.rows?.length ?? 0 ) + 1;
+  const handleSaveAddPoint = (body: AddPointCommand) => {
+    body.round = (currentData?.players.rows?.length ?? 0) + 1;
     boardClient.addPoint(body).then((rs) => {
       if (rs.message != null) {
         return;
@@ -175,140 +175,143 @@ export function GamePlay(): React.JSX.Element {
 
   return (
     <>
-      <Grid container spacing={2} >
-        <Button onClick={back}>Back</Button>
-        <Grid size={12} direction={"row"} >
-          <Grid size={12}>
-            <TableContainer >
-              <Table stickyHeader aria-label="sticky table">
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column, index) => {
-                      if (column.id == "Round") {
-                        return (
-                          <TableCell style={{
-                            width: 1,
-                            textAlign: "center",
-                          }} key={index}>
-                            {
-                              column.label
-                            }
-                          </TableCell>
-                        )
-                      }
+      <Grid container spacing={2}>
+        <Button variant="outlined" onClick={back}>Back</Button>
 
+        <TableContainer>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {columns.map((column, index) => {
+                  // index column
+                  if (column.id == "Round") {
+                    return (
+                      <TableCell style={{
+                        width: 1,
+                        textAlign: "center",
+                        paddingLeft: ".5rem",
+                      }} key={index}>
+                        <h3>#</h3>
+                        <h2 style={{
+                          color: "lightgreen",
+                          textShadow:
+                            "2px 0 #040, -2px 0 #040, 0 2px #040, 0 -2px #040, 1px 1px #040, " +
+                            "-1px -1px #040, 1px -1px #040, -1px 1px #040",
+                          paddingTop: ".5rem"
+                        }}>
+                          Tổng
+                        </h2>
+                      </TableCell>
+                    )
+                  }
+                  // player names and scores
+                  return (
+                    <TableCell key={index} style={{
+                      paddingRight: index == columns.length - 1 ? ".5rem" : "1rem"
+                    }}>
+                      <div
+                        id="PLAYER_LABEL"
+                        style={{
+                          display: "flex", flexDirection: "column",
+                          gap: 12, alignItems: "center",
+                        }}
+                      >
+                        <h3>{column.label}</h3>
+                        <h2 style={{
+                          color: "lightgreen",
+                          textShadow:
+                            "2px 0 #040, -2px 0 #040, 0 2px #040, 0 -2px #040, 1px 1px #040, " +
+                            "-1px -1px #040, 1px -1px #040, -1px 1px #040"
+                        }}>
+                          {column.total} / {column.max}
+                        </h2>
+                      </div>
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            </TableHead>
+
+
+
+            <TableBody>
+              {rows?.map((player, index) => (
+                <TableRow key={index} >
+                  {columns.map((column, index) => {
+                    // index column
+                    if (column.id == "Round") {
                       return (
-                        <TableCell style={{
-                          width: column.width,
+                        <TableCell key={index} style={{
                           textAlign: "center",
-                          height: "100px",
-                        }} key={index}>
-                          <Grid size={12} direction={"row"} style={{
-                            display: "flex",
-                            alignItems: "start",
-                            margin: "4px 0px",
-                            height: "50px",
-                          }}>
-                            <Typography variant="body2" >
-                              {
-                                column.label
-                              }
-                            </Typography>
-                          </Grid>
-
-                          <Grid size={12} direction={"row"} style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            margin: "4px 0px",
-                          }}>
-                            <Typography variant="body1"  >
-                              {
-                                column.total
-                              } / {column.max}
-                            </Typography>
-                          </Grid>
-
+                          paddingLeft: ".5rem"
+                        }} >
+                          <Typography variant="body2">
+                            <Button variant="outlined" color="error"
+                              endIcon={<DeleteIcon />}
+                              onClick={() => {
+                                var round = player[column.id][0] as number;
+                                setDetailsExpanded(true);
+                                setSelectedValue(round);
+                              }}>{player[column.id]}</Button>
+                          </Typography>
                         </TableCell>
                       )
-                    })}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {
-                    rows?.map((player, index) => (
-                      <TableRow key={index} >
-                        {
-                          columns.map((column, index) => {
-                            if (column.id == "Round") {
-                              return (
-                                <TableCell key={index} style={{
-                                  textAlign: "center",
-                                }} >
-                                  <Typography variant="body2">
-                                    <Button variant="outlined" color="error"
-                                      endIcon={<DeleteIcon />}
-                                      onClick={() => {
-                                        var round = player[column.id][0] as number;
-                                        setDetailsExpanded(true);
-                                        setSelectedValue(round);
-                                      }}>{player[column.id]}</Button>
-                                  </Typography>
-                                </TableCell>
-                              )
-                            }
+                    }
 
-                            return (
-                              <TableCell key={index} >
-                                <Grid size={12} spacing={2} direction={"column"} style={{
-                                  alignItems: "center",
-                                }} >
-                                  <Grid size={12} direction={"row"} style={{
-                                    display: "flex",
-                                    justifyContent: "space-around",
-                                    margin: "4px 0px",
-                                    paddingBottom: "4px",
-                                    borderBottom: "1px solid #e0e0e0",
-                                    alignItems: "center"
-                                  }}>
-                                    <Typography variant="body2" >
-                                      {player[column.id][0]} + ({player[column.id][1]})
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={12} style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    margin: "4px 0px",
-                                  }}>
-                                    <Typography variant="body1" style={{
-                                      color: player[column.id][1] > 0 ? "red" : "green",
-                                      fontWeight: "bold",
-                                      animation: "blinker 1s linear infinite",
-                                    }}>
-                                      {player[column.id][2]}
-                                    </Typography>
-                                  </Grid>
-                                </Grid>
-                              </TableCell>
-                            )
-                          })
-                        }
-                      </TableRow>
-                    ))
+
+                    // match scores
+                    return (
+                      <TableCell key={index} style={{
+                        paddingRight: index == columns.length - 1 ? ".5rem" : "1rem"
+                      }} >
+                        <Grid size={12} spacing={2} direction={"column"} style={{
+                          alignItems: "center",
+                        }} >
+                          <Grid size={12} direction={"row"} style={{
+                            display: "flex",
+                            justifyContent: "space-around",
+                            margin: "4px 0px",
+                            paddingBottom: "4px",
+                            borderBottom: "1px solid #e0e0e0",
+                            alignItems: "center"
+                          }}>
+                            <h3>
+                              {player[column.id][0]} + ({player[column.id][1]})
+                            </h3>
+                          </Grid>
+                          <Grid size={12} style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            margin: "4px 0px",
+                          }}>
+                            <h2 style={{
+                              color: player[column.id][1] > 0 ? "red" : "green",
+                              fontWeight: "bold",
+                              animation: "blinker 1s linear infinite",
+                            }}>
+                              {player[column.id][2]}
+                            </h2>
+                          </Grid>
+                        </Grid>
+                      </TableCell>
+                    )
+                  })
                   }
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+                </TableRow>
+              ))
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-
-        </Grid>
+        <div style={{ height: "6rem" }} />
       </Grid>
+
+
       <Dialog
         open={isDetailsExpanded}
         onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
           {"Xác nhận"}
@@ -329,19 +332,18 @@ export function GamePlay(): React.JSX.Element {
         fullScreen={fullScreen}
         open={isAddPointExpanded}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
         </DialogTitle>
-        <AddPoint currentData={currentData} columes={columns} 
-        handleCloseAddPoint={handleCloseAddPoint} 
-        handleSaveAddPoint={handleSaveAddPoint}
-        uniqueCode={boardCode??""}/>
-      
+        <AddPoint currentData={currentData} columes={columns}
+          handleCloseAddPoint={handleCloseAddPoint}
+          handleSaveAddPoint={handleSaveAddPoint}
+          uniqueCode={boardCode ?? ""} />
+
       </Dialog>
       <Fab
         onClick={() => setAddPointExpanded(true)}
-        color="primary" aria-label="add" style={{
+        color="primary" style={{
           position: 'fixed',
           bottom: 20,
           right: 20,
