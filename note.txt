@@ -1,0 +1,4 @@
+docker build -t vmapi/tracking-obd:fixing-kit:1.0.0.0
+docker tag nextjs-docker:latest vmapi/tracking-obd:fixing-kit:1.0.0.0
+
+docker build -t raidengates/card-genius-ui:latest .
